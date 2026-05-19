@@ -1,6 +1,9 @@
 from playwright.sync_api import sync_playwright
 from db_sync import sync_jobs
 from imc import scrape_imc
+from urllib.parse import urljoin
+from p72 import scrape_p72
+
 from opt import scrape_optiver
 from bam import scrape_bam
 
@@ -8,9 +11,10 @@ timeout = 3000
 
 # Urls list
 urls = [
-    "https://optiver.com/working-at-optiver/career-opportunities",
-    "https://www.imc.com/ap/search-careers?jobOffices=Amsterdam,Hong%20Kong,Zug,London",
+    "https://www.imc.com/ap/search-careers?jobOffices=Amsterdam%2CLondon%2CZug%2CHong+Kong&page=1",
+    "https://optiver.com/working-at-optiver/career-opportunities/",
     "https://bambusdev.my.site.com/s/",
+    "https://careers.point72.com/?location=london;milan;paris;warsaw,%20pl;singapore;hong%20kong",
 ]
 
 
@@ -36,6 +40,9 @@ def scrape_all(urls):
 
                 elif "imc.com" in url:
                     jobs = scrape_imc(page)
+
+                elif "point72.com" in url:
+                    jobs = scrape_p72(page)
 
                 else:
                     jobs = []

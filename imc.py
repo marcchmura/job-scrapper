@@ -1,3 +1,6 @@
+from urllib.parse import urljoin
+
+
 def scrape_imc(page):
     jobs = []
 
