@@ -24,4 +24,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run scraper
-        run: python run.py
+        run: python scrapper.py
