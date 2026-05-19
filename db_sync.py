@@ -2,10 +2,7 @@ import psycopg2
 import requests
 
 DB_URL = "postgresql://postgres.rsiumpmazmiguczafepq:0;4~-l5CdObg@aws-0-eu-west-1.pooler.supabase.com:6543/postgres"
-<<<<<<< HEAD
-=======
 
->>>>>>> 9df761a6293e644d9c425c9b48fb21df3b0641e9
 
 def get_connection():
     return psycopg2.connect(DB_URL)
@@ -37,15 +34,18 @@ def insert_jobs(conn, jobs):
 
             result = cur.fetchone()
             if result:
-                new_jobs.append({
-                    "title": result[0],
-                    "link": result[1],
-                    "company": result[2],
-                    "location": result[3],
-                })
+                new_jobs.append(
+                    {
+                        "title": result[0],
+                        "link": result[1],
+                        "company": result[2],
+                        "location": result[3],
+                    }
+                )
 
     conn.commit()
     return new_jobs
+
 
 def sync_jobs(scraped_jobs):
     conn = get_connection()
@@ -65,7 +65,6 @@ def sync_jobs(scraped_jobs):
 
     finally:
         conn.close()
-
 
 
 TELEGRAM_BOT_TOKEN = "8806547080:AAESJB7x5MfwqGXPyfyRt9ZeGKSOC8jyaBg"
@@ -95,8 +94,11 @@ def send_to_telegram(jobs):
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
 
-    requests.post(url, data={
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
-        "disable_web_page_preview": True
-    })
+    requests.post(
+        url,
+        data={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message,
+            "disable_web_page_preview": True,
+        },
+    )
