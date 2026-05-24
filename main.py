@@ -12,10 +12,10 @@ timeout = 3000
 
 # Urls list
 urls = [
-    # "https://www.imc.com/ap/search-careers?jobOffices=Amsterdam%2CLondon%2CZug%2CHong+Kong&page=1",
-    # "https://optiver.com/working-at-optiver/career-opportunities/",
-    # "https://bambusdev.my.site.com/s/",
-    # "https://careers.point72.com/?location=london;milan;paris;warsaw,%20pl;singapore;hong%20kong",
+    "https://www.imc.com/ap/search-careers?jobOffices=Amsterdam%2CLondon%2CZug%2CHong+Kong&page=1",
+    "https://optiver.com/working-at-optiver/career-opportunities/",
+    "https://bambusdev.my.site.com/s/",
+    "https://careers.point72.com/?location=london;milan;paris;warsaw,%20pl;singapore;hong%20kong",
     "https://www.jumptrading.com/hr/experienced-candidates",
     "https://www.jumptrading.com/hr/students-new-grads",
 ]
