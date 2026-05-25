@@ -47,7 +47,7 @@ def insert_jobs(conn, jobs):
     return new_jobs
 
 
-def sync_jobs(scraped_jobs):
+def sync_jobs(scraped_jobs, firm_counts=None):
     conn = get_connection()
 
     try:
@@ -59,7 +59,11 @@ def sync_jobs(scraped_jobs):
         print(f"Scraped jobs: {scraped_count}")
         print(f"New postings: {new_count}")
 
-        send_to_telegram(new_jobs)
+        broken = [firm for firm, count in (firm_counts or {}).items() if count == 0]
+        if broken:
+            print(f"Broken scrapers (0 jobs): {', '.join(broken)}")
+
+        send_to_telegram(new_jobs, firm_counts or {})
 
         return new_jobs
 
@@ -71,26 +75,60 @@ TELEGRAM_BOT_TOKEN = "8806547080:AAESJB7x5MfwqGXPyfyRt9ZeGKSOC8jyaBg"
 TELEGRAM_CHAT_ID = "-5134836158"
 
 
-def send_to_telegram(jobs):
-    if not jobs:
+COMPANY_EMOJI = {
+    "Optiver": "🔵",
+    "IMC": "🟣",
+    "Point72": "🟡",
+    "Jump Trading": "🟠",
+    "Flow Traders": "🟢",
+    "Mako": "⚪",
+    "Jane Street": "🔴",
+    "BAM": "🟤",
+    "Citadel Securities": "🏰",
+    "Crypto.com": "🪙",
+    "SIG": "📊",
+}
+
+
+def send_to_telegram(jobs, firm_counts={}):
+    from datetime import datetime
+
+    broken = [firm for firm, count in firm_counts.items() if count == 0]
+
+    if not jobs and not broken:
         return
 
-    # group jobs by company
-    grouped = {}
+    now = datetime.now().strftime("%d %b %Y · %H:%M")
+    lines = []
 
-    for job in jobs:
-        company = job.get("company", "Unknown")
-        grouped.setdefault(company, []).append(job)
+    if jobs:
+        grouped = {}
+        for job in jobs:
+            company = job.get("company", "Unknown")
+            grouped.setdefault(company, []).append(job)
 
-    message = f"🆕 New Job Alert\n\n"
+        total = sum(len(v) for v in grouped.values())
+        lines.append(f"🚨  NEW JOBS DETECTED  🚨")
+        lines.append(f"🗓  {now}")
+        lines.append(f"📦  {total} new posting{'s' if total != 1 else ''} across {len(grouped)} firm{'s' if len(grouped) != 1 else ''}")
+        lines.append("─" * 28)
 
-    for company, company_jobs in grouped.items():
-        message += f"{company.upper()} ----- {len(company_jobs)} jobs\n"
+        for company, company_jobs in grouped.items():
+            emoji = COMPANY_EMOJI.get(company, "🏢")
+            lines.append(f"\n{emoji}  {company.upper()}  ·  {len(company_jobs)} job{'s' if len(company_jobs) != 1 else ''}")
+            for job in company_jobs[:10]:
+                lines.append(f"  ↳ {job['title']}")
+                lines.append(f"     {job['link']}")
 
-        for job in company_jobs[:10]:
-            message += f"• {job['title']}\n{job['link']}\n"
+        lines.append("\n" + "─" * 28)
 
-        message += "\n"
+    if broken:
+        lines.append(f"\n⚠️  BROKEN SCRAPERS  ({len(broken)} firm{'s' if len(broken) != 1 else ''})")
+        lines.append("Returned 0 jobs — check the code:\n")
+        for firm in broken:
+            lines.append(f"  ❌  {firm}")
+
+    message = "\n".join(lines)
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
 

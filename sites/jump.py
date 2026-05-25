@@ -1,14 +1,20 @@
 from urllib.parse import urljoin
 
 
-def scrape_jump(page):
+def scrape_jump(page, url):
     jobs = []
 
-    # wait until jobs load
-    page.wait_for_selector("div.jobs-item")
+    page.goto(url, wait_until="domcontentloaded", timeout=60000)
+    # Wait until JS has replaced the placeholder "Jobs Title" with real content
+    page.wait_for_function(
+        """() => {
+            const el = document.querySelector('div[gw-jobs-title]');
+            return el && el.innerText.trim() !== 'Jobs Title' && el.innerText.trim() !== '';
+        }""",
+        timeout=30000,
+    )
 
-    # get all job cards
-    listings = page.query_selector_all("div.jobs-item")
+    listings = page.query_selector_all("div[gw-jobs-item]")
 
     for item in listings:
         try:
