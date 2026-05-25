@@ -117,8 +117,9 @@ def send_to_telegram(jobs, firm_counts={}):
             emoji = COMPANY_EMOJI.get(company, "🏢")
             lines.append(f"\n{emoji}  {company.upper()}  ·  {len(company_jobs)} job{'s' if len(company_jobs) != 1 else ''}")
             for job in company_jobs[:10]:
-                lines.append(f"  ↳ {job['title']}")
-                lines.append(f"     {job['link']}")
+                location = job.get("location")
+                loc_str = f"  ({location})" if location else ""
+                lines.append(f"  ↳ {job['title']}{loc_str}")
 
         lines.append("\n" + "─" * 28)
 
